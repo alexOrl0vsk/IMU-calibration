@@ -24,34 +24,34 @@ class PowerController:
 			case 'cool':
 				# default cooling PID setup
 				pid = PID(Kp=-2.5, Ki=-0.005, Kd=-5, setpoint=target_temp)
-				pid.output_limits = (0.5, 4)								# in [V]
-				pid.sample_time = 5 										# update every 5 sec
-				pid.starting_output = 3.5 									# good value to start from so we get to steady state faster
+				pid.output_limits = (0.5, 4)				# in [V]
+				pid.sample_time = 5 					# update every 5 sec
+				pid.starting_output = 3.5 				# good value to start from so we get to steady state faster
 				return pid
 			case 'heat':
 				# default heating PID setup
 				pid = PID(Kp=2.9, Ki=0.005, Kd=15, setpoint=target_temp)	
-				pid.output_limits = (0, 3.5)								# in [V]		
-				pid.sample_time = 3 										# update every 3 sec
-				pid.differential_on_measurement = True						# use delta input for derivative term (library default)
+				pid.output_limits = (0, 3.5)				# in [V]		
+				pid.sample_time = 3 					# update every 3 sec
+				pid.differential_on_measurement = True			# use delta input for derivative term (library default)
 				return pid
 			case _:
 				print(" * pidLoad() :: wrong controller mode choose 'cool' or 'heat'.")
 				return None
 
 	def __init__(self, pid_mode:str, target_temp, job_name):
-		#self.power_supply = KoradPower()									# ka3005p 		PowerSupply object
-		self.controller = self.pidLoad(pid_mode,target_temp)				# simple_pid 	PID object
-		self.controller_mode = pid_mode										# 'cool' or 'heat'
-		self.sensor = Sensor()												# um7py 		UM7Serial object
-		self.rotary_stages = RotaryStage.loadAxes()							# static method, returns a list of stage objects		
-		self.temp_error_tollerance = 0.005 									# 0.5% relative error allowed by default
-		self.ready_for_job = Event()										# signal to start the experiment
-		self.job_done = Event()												# signal to stop the PID and job
-		self.lock = Lock()													# lock for thread safety
-		self.controller_start_time = None 									# for saving the controller history
-		self.job_name = job_name											# experiment data folder name 
-		self.root = './'													# path for all saved data, job folders are placed here 
+		#self.power_supply = KoradPower()			# ka3005p 		PowerSupply object
+		self.controller = self.pidLoad(pid_mode,target_temp)	# simple_pid 	PID object
+		self.controller_mode = pid_mode				# 'cool' or 'heat'
+		self.sensor = Sensor()					# um7py 		UM7Serial object
+		self.rotary_stages = RotaryStage.loadAxes()		# static method, returns a list of stage objects		
+		self.temp_error_tollerance = 0.005 			# 0.5% relative error allowed by default
+		self.ready_for_job = Event()				# signal to start the experiment
+		self.job_done = Event()					# signal to stop the PID and job
+		self.lock = Lock()					# lock for thread safety
+		self.controller_start_time = None 			# for saving the controller history
+		self.job_name = job_name				# experiment data folder name 
+		self.root = './'					# path for all saved data, job folders are placed here 
 		self.controller_history = {											
 			'Setpoint': [],
 			'Temperature': [],
@@ -62,7 +62,7 @@ class PowerController:
 	def updateHistory(self,control_temp,new_voltage):
 		""" Updates the PID history.
 			@param	control_temp	-- last temperature recieved from sensor
-			@param	new_voltage		-- newest input voltage from PID
+			@param	new_voltage	-- newest input voltage from PID
 		"""
 		self.controller_history['Setpoint'].append(self.controller.setpoint)
 		self.controller_history['Temperature'].append(control_temp)
@@ -89,11 +89,11 @@ class PowerController:
 			After ready_for_job is set, Lock must be used to access sensor data.
 		"""
 		try:
-			curr_temp = self.sensor.getTemperature()					# get um7 temperature
+			curr_temp = self.sensor.getTemperature()			# get um7 temperature
 			print(f"Current temp :: {curr_temp:.3f} [deg C]")
 			# while error is above the allowed threshold, do PID loop
 			while(abs((curr_temp - self.controller.setpoint) / float(self.controller.setpoint)) > self.temp_error_tollerance):
-				curr_temp = self.sensor.getTemperature()					# get um7 temperature		
+				curr_temp = self.sensor.getTemperature()		# get um7 temperature		
 				self.doPID(curr_temp)
 				print(f"Current temp = {curr_temp:.3f} [deg C] (target = {self.controller.setpoint})\tPID internals = [{', '.join(f'{x:.3f}' for x in self.controller.components)}]")
 			# after the temperature has stabilized, we are almost ready to start
@@ -108,8 +108,8 @@ class PowerController:
 			self.ready_for_job.set()
 			# continue running PID until the job_done signal is recieved from the experiment
 			while not self.job_done.is_set():
-				with self.lock:										# here data race with sensor can occur, so use lock
-					curr_temp = self.sensor.getTemperature()		# get um7 temperature
+				with self.lock:					# here data race with sensor can occur, so use lock
+					curr_temp = self.sensor.getTemperature()	# get um7 temperature
 					print(f"Temp = {curr_temp:.3f} [deg C] (target = {self.controller.setpoint})\tPID internals = [{', '.join(f'{x:.3f}' for x in self.controller.components)}]")
 				self.doPID(curr_temp)
 				time.sleep(0.5)
@@ -172,7 +172,7 @@ class PowerController:
 			#static_data = pd.DataFrame()
 			with self.lock:
 				print("gyroJob() :: getting stationary data...")
-				static_data = self.sensor.getAllRawData(5000)				# in samples
+				static_data = self.sensor.getAllRawData(5000)	# in samples
 			
 			# save the static (bias) data 
 			filepath = Path(f'{self.root}{self.job_name}__temp__{self.controller.setpoint}/vel_0_gyro_data.csv')
@@ -203,12 +203,12 @@ class PowerController:
 			Saves the sensor data as csv.
 		"""
 		try:
-			df_full = pd.DataFrame(columns=['gyro_raw_x','gyro_raw_y' ,	'gyro_raw_z' ,	'gyro_raw_time',
-											'accel_raw_x','accel_raw_y', 'accel_raw_z' , 'accel_raw_time',
-											'mag_raw_x', 'mag_raw_y' ,'mag_raw_z' , 'mag_raw_time','temperature' ,'temperature_time' ])
+			df_full = pd.DataFrame(columns=['gyro_raw_x','gyro_raw_y' ,'gyro_raw_z' ,'gyro_raw_time',
+							'accel_raw_x','accel_raw_y', 'accel_raw_z' , 'accel_raw_time',
+							'mag_raw_x', 'mag_raw_y' ,'mag_raw_z' , 'mag_raw_time','temperature' ,'temperature_time' ])
 			Stage2 , Stage1 = self.rotary_stages
-			num_azimuth_points = [1,4,8,12,8,4,1]			# number of orientations at each elevation level, 12 at horizontal level 
-			Stage1.shiftPosition(-120)						# get to start position	
+			num_azimuth_points = [1,4,8,12,8,4,1]		# number of orientations at each elevation level, 12 at horizontal level 
+			Stage1.shiftPosition(-120)			# get to start position	
 			for st1_iter,st2_iter in zip(range(1,8),num_azimuth_points):		
 				Stage1.shiftPosition(30)
 				for azi in range(1,st2_iter+1):
