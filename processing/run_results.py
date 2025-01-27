@@ -4,20 +4,20 @@ from gyro_processing import *
 from allan import *
 
 def run_sample_times():
-	""" Plots the sampling periods at selected settings (20000 samples)"""
+	""" Plots the sampling periods at selected settings (20000 samples)."""
 	directory = './UM7_data/baud_v_sample'
 	for file in os.listdir(directory):
 		if file.endswith(".csv"):
 			plotSampleTimes(pd.read_csv(os.path.join(directory, file)),file)
 
 def run_all_accel_results():	
+	""" Plot accelerometer calibration results, choose one experiment (fan or no fan)."""
 	#directory = './UM7_data/accel_data/accel_with_fan/accel_processed'		# with fan 
 	directory = './UM7_data/accel_data/accel_no_fan/accel_processed'		# NO fan 
-	#accel_processing(directory)		# saves the averaged data
-	#accel_average_check(directory)
 	plot_accel_results(directory)
 
 def run_all_gyro_results():
+	""" Plot gyro calibration results, bias calls the separate folders, scales/cross-factors call the same data sorted by temperature."""
 	path = Path('./UM7_data/gyro_data/GYRO_X/X_ax_cool_gyro_job__temp__40')
 	plot_gyro_stage_one_axis(path,'x')				# stage vs sensor data
 
@@ -32,6 +32,7 @@ def run_all_gyro_results():
 
 
 def run_allan():
+	""" Gyro Allan variance plot without extreme outliers."""
 	df = pd.read_csv(f'./UM7_data/allan_100_Hz.csv',sep=";", on_bad_lines='warn' )		
 	print("Before filtering :: ",df.shape)
 	for data in [df['gyro_raw_x'],df['gyro_raw_y'],df['gyro_raw_z']]:
@@ -49,6 +50,7 @@ def run_allan():
 	allanPlot(df,resample_f,f'gyro Allan resampled at {resample_f}')
 
 def run_all_pid_plots():
+	""" Controller input signal vs IMU temperature plots, choose accel or gyro roots."""
 	rootX = './UM7_data/gyro_data/GYRO_X'
 	rootY = './UM7_data/gyro_data/GYRO_Y'
 	rootZ = './UM7_data/gyro_data/GYRO_Z'
@@ -64,10 +66,10 @@ def run_all_pid_plots():
 
 
 def main():
-	#run_allan()						# gyro Allan variance plot
+	#run_allan()					# gyro Allan variance plot
 	#run_all_pid_plots()				# all pid plots, choose gyro or accel roots
 	#run_all_accel_results()			# accelerometer calibration, uncomment one of directories (fan or no fan)
-	run_all_gyro_results()
+	#run_all_gyro_results()				# gyro results: biases, scales, cross-factors
 
 if __name__ == '__main__':
 	main()
