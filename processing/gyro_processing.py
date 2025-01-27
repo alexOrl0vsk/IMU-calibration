@@ -109,7 +109,7 @@ def gyroLS(folder):
 
 def gyro_temperatures(directory):
 	""" Computes gyroLS for each tempearture 
-		@ param  directory	-- path to root directory GYROS_3 containing gyro data folders, 
+		@param  directory	-- path to root directory GYROS_3 containing gyro data folders, 
 		last two characters of folder are the temperature.
 		returns a list of dicts with calibration results
 	"""
@@ -129,7 +129,9 @@ def gyro_temperatures(directory):
 	return full_data
 
 def plot_gyro_scales(directory):
-	""" Plots the gyro scale factors against temperature"""
+	""" Plots the gyro scale factors against temperature
+ 		@param  directory	-- path to GYROS_3, 
+ 	"""
 	full_data = gyro_temperatures(directory)
 	# with pd.option_context('display.max_rows', None, 'display.max_columns', None,'display.width', 2000):
 	# 	pprint(full_data)
@@ -162,8 +164,9 @@ def plot_gyro_scales(directory):
 	plt.show()
 
 def plot_gyro_off_diag(directory):
-	""" Plots the gyro cross-axis factors against temperature"""
-
+	""" Plots the gyro cross-axis factors against temperature
+ 		@param  directory	-- path to GYROS_3, 
+ 	"""
 	full_data = gyro_temperatures(directory)
 	off_diag_data = []
 	for point in full_data:
@@ -202,7 +205,9 @@ def plot_gyro_off_diag(directory):
 	plt.show()
 	
 def plot_gyro_biases(roots):
-	""" Plots the gyro biases against temperature"""
+	""" Plots the gyro biases against temperature
+ 		@param  roots	-- list of GYRO_X,Y,Z roots.
+ 	"""
 	for root in roots:
 		gyro_biases = {field : [] for field in ['Temperature','X_bias','Y_bias','Z_bias','gyro_x_std','gyro_y_std','gyro_z_std']}
 		for folder in os.listdir(root):
@@ -252,10 +257,10 @@ def plot_gyro_biases(roots):
 		#plt.savefig(f'Gyroscope Biases - sensing {root[-1]}, 5000 samples.png', format='png', dpi=300)
 	plt.show()
 
-def gyro_bias_drift():
-	""" Plots the gyro turn-on-turn-off bias drift"""
-
-	directory = 'D:/uni/sem VII/Diploma/data_saved/gyro_bias_tests/jan_16_5000_samples'
+def gyro_bias_drift(directory):
+	""" Plots the gyro turn-on-turn-off bias drift. This data not is not in the archive due to being uninteresting.
+ 		@param  directory	-- path to root directory with gyro data
+ 	"""
 	bias_df =  {field : [] for field in ['Temperature','X_bias','Y_bias','Z_bias']}
 	for file in os.listdir(directory):
 		if file.endswith('.csv'):
