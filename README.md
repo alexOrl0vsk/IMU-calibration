@@ -17,4 +17,5 @@ Controller and data processing for UM7 orientation sensor.
     - UM7_data  (contains the calibration data)
 
 # Using processing
-The archived sensor data should be unpacked to the processing folder, the relative paths are noted in run_results.py.
+Sensor data archive: https://drive.google.com/file/d/1EK62wzkjGX4GBCBHg8snI6bThMVn3LAt/view?usp=sharing 
+The archived sensor data should be unpacked to the processing folder (as shown above), the relative paths are noted in run_results.py.
