@@ -5,9 +5,9 @@ from typing import Tuple, List
 
 class RotaryStage:
 	def __init__(self, port: str, calib_coeff: float = None):
-		self.port = port 						# COM port address
+		self.port = port 				# COM port address
 		self.stage = ximc.Axis(port) 			# ximc.Axis object
-		self._stage_name = None 				# name of the rotary stage
+		self._stage_name = None 			# name of the rotary stage
 		self.calib_coeff = calib_coeff			# step to degree coefficient in full step 
 
 	@property
@@ -51,7 +51,7 @@ class RotaryStage:
 	def getPosition(self):
 		"""Returns the stage current position."""
 		if self.calib_coeff is None:
-			return self.stage.get_position().Position 			# in steps
+			return self.stage.get_position().Position 		# in steps
 		else:
 			return self.stage.get_position_calb().Position 	 	# in user units
 
@@ -97,7 +97,7 @@ class RotaryStage:
 			print(' * setVelocityCalb() :: Calibration coefficient must be specified.')
 			return	
 		move_settings = self.stage.get_move_settings_calb()
-		move_settings.Speed = abs(ang_vel)					# only positive values are accepted 
+		move_settings.Speed = abs(ang_vel)				# only positive values are accepted 
 		self.stage.set_move_settings_calb(move_settings)
 
 	def moveVelocity(self, ang_vel):
@@ -108,14 +108,14 @@ class RotaryStage:
 			print(' * moveVelocity() :: Calibration coefficient must be specified.')
 			return	
 		self.setVelocityCalb(ang_vel)
-		if (ang_vel > 0):					# assume command_right() as positive direction
+		if (ang_vel > 0):				# assume command_right() as positive direction
 			self.stage.command_right()
 		else :
 			self.stage.command_left()
 		while (self.getMoveState() & ximc.MoveState.MOVE_STATE_TARGET_SPEED) == 0:
 			print(f'<> moveVelocity({ang_vel}) :: Accelerating {self.stage_name} to {ang_vel} deg/s ...')
 			time.sleep(1)
-		time.sleep(0.5)						# give the stage a moment to update the move status (for accurate logging)
+		time.sleep(0.5)					# give the stage a moment to update the move status (for accurate logging)
 		print(f"<> moveVelocity({ang_vel}) :: Targer velocity reached, moving {self.stage_name} at {self.getVelocity():.3f} deg/s ..." )
 
 	def stop(self):
@@ -169,8 +169,8 @@ class RotaryStage:
 	
 	def configureSettings(self, set_home: bool = False, save_flash: bool = False, new_stage_name: str = None):
 		""" Sets the current position as home, configures the stage to default settings and saves to flash memory.
-			@param	set_home 			-- set the current position as home
-			@param	save_flash 			-- save the settings to flash memory
+			@param	set_home 		-- set the current position as home
+			@param	save_flash 		-- save the settings to flash memory
 			@param	new_stage_name 		-- name for the stage 
 		"""
 		if (self.calib_coeff is None):
@@ -188,8 +188,8 @@ class RotaryStage:
 		move_settings_calb = self.stage.get_move_settings_calb()
 		home_settings_calb = self.stage.get_home_settings_calb()
 
-		brake_settings.BrakeFlags = 0x01 				# BRAKE_ENABLED 	
-		move_settings_calb.Speed = 200 					# degrees/s 
+		brake_settings.BrakeFlags = 0x01 			# BRAKE_ENABLED 	
+		move_settings_calb.Speed = 200 				# degrees/s 
 		move_settings_calb.Accel = 200 					
 		move_settings_calb.Decel = 200 					
 		move_settings_calb.AntiplaySpeed = 200 			# degrees/s 
@@ -253,7 +253,7 @@ class RotaryStage:
 		for device, calib_coeff in zip(devices,calib_coeffs):
 			axes.append(RotaryStage(device['uri'], calib_coeff))
 		for axis in axes:
-			axis.open()						# RotaryStage method
+			axis.open()					# RotaryStage method
 			if(axis.stage._is_opened):
 				print(f"<> loadAxes() {axis.stage_name} (calib_coeff = {axis.calib_coeff}) opened! <>")
 		return axes
