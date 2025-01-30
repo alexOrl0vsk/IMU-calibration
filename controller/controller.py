@@ -3,15 +3,13 @@ import time
 import pandas as pd
 from pathlib import Path
 from threading import Thread,Event, Lock
-
-from ka3005p import PowerSupply
 from simple_pid import PID
+from korad import KoradPower		# local
+from um7 import Sensor			# local
+from rotaryStages import RotaryStage	# local
+# from ka3005p import PowerSupply	# dependencies for locals  
 # from rsl_comm_py import UM7Serial
 # import libximc.highlevel as ximc
-
-from um7 import Sensor
-from korad import KoradPower
-from rotaryStages import RotaryStage
 
 class PowerController:
 	def pidLoad(self, pid_mode:str, target_temp):
